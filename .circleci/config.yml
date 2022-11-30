@@ -1,45 +1,42 @@
 version: 2.1
 
-jobs:
-  buil:
-    docker :
-      type: string
-      - image: circleci/node:13.8.0
-    steps :
-      - checkout
-      - run: npm i
-      - save_cache:
-          keys : "npm dependencies"
-          paths :
-            - /src/node_modules
-      - run: npm run lint
-  test :
-    docker:
-      type: string
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: "npm dependencies"
-      - run: npm i
-      - run: npm run test
-  analyze:
-    docker:
-      type: string
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: "npm dependencies"
-      - run: npm audit
-
 workflows:
-  my_workflow:
+  version: 2
+  build:
     jobs:
-      - buil
-      - test:
-          requires:
-            - buil
-      - analyze:
-          requires:
-            - test  
+      - build
+
+jobs:
+  build:
+    working_directory: ~/mern-starter
+    docker:
+      - image: circleci/node:10.16.3
+      - image: mongo:4.2.0
+    steps:
+      - checkout
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@5'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install-npm-wee
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: test
+          command: npm test
+      - run:
+          name: code-coverage
+          command: './node_modules/.bin/nyc report --reporter=text-lcov'
+      - store_artifacts:
+          path: test-results.xml
+          prefix: tests
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
+      - store_test_results:
+          path: test-results.xml
