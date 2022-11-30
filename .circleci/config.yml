@@ -1,9 +1,7 @@
 version: 2.1
 
 jobs:
-  buil:
-    docker :
-      image: circleci/node:13.8.0
+  build:
     steps :
       - checkout
       - run: npm i
@@ -13,18 +11,14 @@ jobs:
             - /src/node_modules
       - run: npm run lint
   test :
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
+    steps :
       - checkout
       - restore_cache:
           keys: "npm dependencies"
       - run: npm i
       - run: npm run test
   analyze:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
+    steps :
       - checkout
       - restore_cache:
           keys: "npm dependencies"
@@ -33,10 +27,10 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      - buil
+      - build
       - test:
           requires:
-            - buil
+            - build
       - analyze:
           requires:
             - test  
