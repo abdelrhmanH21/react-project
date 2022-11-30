@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  buil:
     docker :
       image: circleci/node:13.8.0
     steps :
@@ -33,10 +33,10 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      - build
+      - buil
       - test:
           requires:
-            - build
+            - buil
       - analyze:
           requires:
             - test  
